@@ -1,0 +1,34 @@
+# Check: on every push to main (and every pull request), GitHub installs the
+# dependencies, builds the interface and starts the server in production mode (smoke test).
+# Nothing is deployed here: see deploy.yml.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call: # reused by deploy.yml before each release
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Build and smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+
+      - name: Install and build
+        run: npm run build
+
+      - name: Smoke test (production mode)
+        run: bash scripts/smoke-test.sh

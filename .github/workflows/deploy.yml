@@ -1,0 +1,51 @@
+# Release, started by hand: "Actions" tab › "Deploy to production"
+# › "Run workflow" (on the main branch).
+#   1. checks the code (same check as ci.yml)
+#   2. waits for approval if the "production" environment requires it (Settings › Environments)
+#   3. moves the "production" branch forward to this commit of main
+# Hostinger watches the "production" branch and redeploys the app as soon as it changes.
+name: Deploy to production
+
+on:
+  workflow_dispatch:
+
+# One release at a time; a second one waits for the first to finish
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/ci.yml
+
+  promote:
+    name: Promote main to production
+    needs: verify
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    permissions:
+      contents: write # to push the production branch
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Fast-forward only (no --force): if "production" has a commit that isn't
+      # in main, the push is refused rather than overwriting anything.
+      - name: Update the production branch
+        run: git push origin "${GITHUB_SHA}:refs/heads/production"
+
+      - name: Summary
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          {
+            echo "### Real Reel Drama v${VERSION} sent to production"
+            echo ""
+            echo "- Commit: \`${GITHUB_SHA::7}\` — $(git log -1 --format=%s "${GITHUB_SHA}")"
+            echo "- Hostinger redeploys the app from the \`production\` branch."
+          } >> "$GITHUB_STEP_SUMMARY"

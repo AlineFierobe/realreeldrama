@@ -1,0 +1,65 @@
+/* Design tokens of the Figma mock-up (Styleguide + Blog UI kit).
+ *
+ * Fonts: the mock-up uses Paperink, French Aperitif, Brandon Grotesque and Lulo One.
+ * Their web licenses aren't part of the project, so the site uses the substitutions
+ * approved in the UI kit ("Approved font substitutions"):
+ *   Paperink           -> Caveat         handwritten accents
+ *   French Aperitif    -> Patrick Hand   playful editorial titles
+ *   Brandon Grotesque  -> Nunito Sans    body text and controls
+ *   Lulo One           -> Josefin Sans   short uppercase overlines
+ * To use the originals once you own a web license: add their @font-face rules
+ * (files in client/public/fonts) and put their names first in the stacks below. */
+:root {
+  /* Palette (Styleguide) */
+  --pink: #ffcedc;
+  --blush: #ffafad;
+  --peach: #ff9284;
+  --coral: #ff553d;
+  --hot-pink: #ff61a9;
+  --green: #18b16d;
+  --yellow: #ddde75;
+  --aqua: #b5e6e8;
+  --teal: #00b1ae;
+  --slate: #4a5f89;
+  --cream: #faf5ec;
+  --ink: #5c5d5e;
+
+  /* Derived from the kit */
+  --line: rgba(92, 93, 94, 0.16); /* borders, dividers */
+  --muted: rgba(92, 93, 94, 0.33); /* disabled state */
+  --paper: #fffdf8; /* cards and fields on the cream canvas (CMS) */
+
+  /* Typography */
+  --font-script: 'Caveat', 'Paperink', cursive;
+  --font-display: 'Patrick Hand', 'French Aperitif', 'Comic Sans MS', cursive;
+  --font-body: 'Nunito Sans', 'Brandon Grotesque', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-caps: 'Josefin Sans', 'Lulo One', system-ui, sans-serif;
+
+  /* Radii */
+  --r-xs: 4px; /* links */
+  --r-sm: 8px; /* button surface */
+  --r-md: 16px; /* cards, artwork */
+  --r-lg: 24px; /* photos */
+  --r-pill: 100px; /* tags */
+
+  /* Layout */
+  --page-max: 1440px;
+  --gutter: 80px; /* side padding of the sections */
+  --header-gutter: 56px; /* side padding of the header and footer */
+
+  --shadow-card: 0 1px 2px rgba(74, 95, 137, 0.08), 0 8px 24px rgba(74, 95, 137, 0.08);
+}
+
+@media (max-width: 1100px) {
+  :root {
+    --gutter: 48px;
+    --header-gutter: 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --gutter: 20px;
+    --header-gutter: 20px;
+  }
+}
