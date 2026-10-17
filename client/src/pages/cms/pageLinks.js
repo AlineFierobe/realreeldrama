@@ -4,6 +4,7 @@ export const PAGE_LINKS = [
   { key: 'home', name: 'Homepage', path: '/', color: 'pink' },
   { key: 'about', name: 'About', path: '/about', color: 'yellow' },
   { key: 'contact', name: 'Contact', path: '/contact', color: 'aqua' },
+  { key: 'legal', name: 'Legal notice', path: '/legal-notice', color: 'peach' },
   { key: 'site', name: 'Site settings', path: null, color: 'slate' },
 ];
 

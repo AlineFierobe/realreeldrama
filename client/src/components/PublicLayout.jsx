@@ -9,7 +9,7 @@ import { Loader, Signature, TextLink } from './ui.jsx';
 // Values used until the settings arrive from the server
 const FALLBACK_SITE = {
   identity: { siteName: 'REAL REEL DRAMA', signature: 'Verticals & all the feelings' },
-  footer: { closing: '', text: '', socialTitle: '', copyright: 'REAL REEL DRAMA', colophon: '' },
+  footer: { closing: '', text: '', socialTitle: '', copyright: 'REAL REEL DRAMA', colophon: '', legalLabel: 'Legal notice' },
   social: { links: [] },
 };
 
@@ -123,6 +123,14 @@ function Footer() {
         <div className="site-footer__colophon">
           <p className="site-footer__copyright">
             © {new Date().getFullYear()} {footer.copyright}
+            {footer.legalLabel && (
+              <>
+                <span aria-hidden="true"> · </span>
+                <Link to="/legal-notice" className="site-footer__legal">
+                  {footer.legalLabel}
+                </Link>
+              </>
+            )}
           </p>
           {footer.colophon && <p className="script site-footer__colophon-note">{footer.colophon}</p>}
         </div>

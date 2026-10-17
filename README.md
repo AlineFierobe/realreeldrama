@@ -1,6 +1,6 @@
 # Real Reel Drama
 
-Website of **Real Reel Drama** (“Verticals & all the feelings”), Meagan Johnson’s home for vertical drama culture: homepage (Meet Meagan, Real Reel Unscripted, Reviews, Industry, About, Social medias), About and Contact pages. Every text and picture can be changed in a **CMS** (`/cms`) restricted to allowed Google accounts, without touching the Figma mock-up’s style.
+Website of **Real Reel Drama** (“Verticals & all the feelings”), Meagan Johnson’s home for vertical drama culture: homepage (Meet Meagan, Real Reel Unscripted, Reviews, Industry, About, Social medias), About, Contact and Legal notice pages. Every text and picture can be changed in a **CMS** (`/cms`) restricted to allowed Google accounts, without touching the Figma mock-up’s style.
 
 Built on the same model as **Voices of Verticals**, **I Love Verticals** and **Inkspire** (Google sign-in, security, Hostinger deployment through the `production` branch).
 
@@ -55,8 +55,9 @@ npm run dev
 ## The CMS
 
 - **Dashboard**: pages edited, unread messages, uploaded images.
-- **Pages** (Homepage, About, Contact): one form per page, split like the mock-up (Hero, Real Reel Unscripted, Reviews…). Lists (links, cards, topics…) can be added, reordered and removed. Tag colors are picked from the UI kit’s tags. “Restore mock-up texts” puts the mock-up texts back in a section. Each page also has its SEO title and description, with a search result preview.
+- **Pages** (Homepage, About, Contact, Legal notice): one form per page, split like the mock-up (Hero, Real Reel Unscripted, Reviews…). Lists (links, cards, topics…) can be added, reordered and removed. Tag colors are picked from the UI kit’s tags. “Restore mock-up texts” puts the mock-up texts back in a section. Each page also has its SEO title and description, with a search result preview.
 - **Images**: upload (button or drag and drop) JPEG, PNG, WebP or GIF up to 8 MB; every image field of the editors can upload or pick from the library, or go back to the mock-up photo. Its framing tool shows the image in the shape of its slot on the site: drag to move it, zoom with the slider, the mouse wheel or + / −. An image still used on a page can’t be deleted.
+- **Legal notice**: publisher and host details (empty fields are hidden on the site) and free sections (intellectual property, personal data, cookies…). The default texts describe how the site actually works; the publisher’s details must be completed and checked against your legal obligations.
 - **Messages**: messages sent from the Contact page (read / unread, reply by email, delete).
 - **Site settings**: brand, footer texts and social media links (used by the footer, the homepage “Social medias” section and the Contact page).
 

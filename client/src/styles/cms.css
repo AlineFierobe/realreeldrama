@@ -351,6 +351,9 @@
 .cms-card--aqua {
   border-top-color: var(--aqua);
 }
+.cms-card--peach {
+  border-top-color: var(--peach);
+}
 .cms-card--slate {
   border-top-color: var(--slate);
 }
@@ -436,6 +439,9 @@
 }
 .cms-section--aqua .cms-section__head {
   background: var(--aqua);
+}
+.cms-section--peach .cms-section__head {
+  background: var(--peach);
 }
 .cms-section--slate .cms-section__head {
   background: var(--slate);

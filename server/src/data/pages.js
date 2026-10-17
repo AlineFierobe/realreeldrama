@@ -77,6 +77,7 @@ export const PAGES = [
           text('socialTitle', 'Social links title', 'Let’s keep talking'),
           text('copyright', 'Copyright', 'REAL REEL DRAMA', 'The © sign and the current year are added automatically.'),
           text('colophon', 'Closing words', 'A little cinema. A lot of feeling.'),
+          text('legalLabel', 'Legal notice link label', 'Legal notice', 'Link to the Legal notice page, next to the copyright.'),
         ],
       },
       {
@@ -319,6 +320,83 @@ export const PAGES = [
         label: 'Social media box',
         description: 'The links come from Site settings › Social media.',
         fields: [text('title', 'Title', 'Prefer socials?'), area('text', 'Text', 'Follow Real Reel Drama for reviews, discoveries and behind-the-scenes moments.')],
+      },
+    ],
+  },
+  {
+    key: 'legal',
+    path: '/legal-notice',
+    name: 'Legal notice',
+    description: 'Who publishes and hosts the site, intellectual property, personal data and cookies. Fill in the publisher’s details: empty fields are not shown.',
+    seo: {
+      title: 'Legal notice · Real Reel Drama',
+      description: 'Legal notice of the Real Reel Drama website: publisher, hosting, intellectual property, personal data and cookies.',
+    },
+    sections: [
+      {
+        key: 'intro',
+        label: 'Introduction',
+        fields: [
+          sectionLabel('LEGAL'),
+          handNote('The small print, with feelings.'),
+          text('title', 'Title', 'Legal notice'),
+          area('text', 'Introduction', 'This page tells you who publishes and hosts the Real Reel Drama website, and how your information is handled.'),
+          text('updated', 'Last update', 'October 2026', 'Shown as “Last updated: …”.'),
+        ],
+      },
+      {
+        key: 'publisher',
+        label: 'Publisher',
+        description: 'Person or company responsible for the site. Check these details with your legal obligations (they depend on your country and status).',
+        fields: [
+          text('title', 'Heading', 'Publisher'),
+          text('name', 'Name or company name', 'Meagan Johnson'),
+          text('status', 'Legal status', '', 'E.g. individual, sole proprietor, company with its registration number.'),
+          area('address', 'Postal address'),
+          text('email', 'Contact email', '', 'Shown as a clickable email address.'),
+          text('phone', 'Phone'),
+          text('director', 'Publication director', 'Meagan Johnson'),
+        ],
+      },
+      {
+        key: 'host',
+        label: 'Hosting',
+        fields: [
+          text('title', 'Heading', 'Hosting'),
+          text('name', 'Host', 'Hostinger International Ltd.'),
+          area('address', 'Address', '61 Lordou Vironos Street\n6023 Larnaca, Cyprus'),
+          url('website', 'Website', 'https://www.hostinger.com'),
+        ],
+      },
+      {
+        key: 'terms',
+        label: 'Sections',
+        fields: [
+          list(
+            'blocks',
+            'Sections',
+            'Section',
+            [text('title', 'Heading'), area('text', 'Text')],
+            [
+              {
+                title: 'Intellectual property',
+                text: 'The texts, photos, logos, show artwork and design of this website belong to Real Reel Drama or to their respective owners. They may not be copied, reproduced or reused without prior written permission.\n\nNames, posters and images of the vertical dramas mentioned on the site belong to their producers and distributors.',
+              },
+              {
+                title: 'Personal data',
+                text: 'The contact form collects your name, your email address and your message. They are only used to answer you, are never sold or shared, and are kept no longer than needed to follow up on your message.\n\nYou can ask to access, correct or delete your data at any time through the Contact page.',
+              },
+              {
+                title: 'Cookies',
+                text: 'Visitors of this website get no cookie: no advertising, no audience tracking, and the fonts are served by the site itself. Only the people who edit the content sign in with Google, which sets a technical session cookie.',
+              },
+              {
+                title: 'Links',
+                text: 'The site links to other websites and social networks (Instagram, YouTube, TikTok, LinkedIn…). Real Reel Drama isn’t responsible for their content or their privacy practices.',
+              },
+            ]
+          ),
+        ],
       },
     ],
   },

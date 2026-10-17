@@ -18,6 +18,7 @@ import { Loader } from './components/ui.jsx';
 import Home from './pages/Home.jsx';
 import About from './pages/About.jsx';
 import Contact from './pages/Contact.jsx';
+import Legal from './pages/Legal.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 // The CMS is loaded separately: site visitors don't download its code
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
       { path: '/', element: <Home /> },
       { path: '/about', element: <About /> },
       { path: '/contact', element: <Contact /> },
+      { path: '/legal-notice', element: <Legal /> },
       { path: '*', element: <NotFound /> },
     ],
   },

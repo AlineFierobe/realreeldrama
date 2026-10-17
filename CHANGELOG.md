@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0 — 2026-10-17
+
+Legal notice page.
+
+- New `/legal-notice` page built with the UI kit: publisher and hosting cards (empty fields are hidden, email shown as a link), then free sections (intellectual property, personal data, cookies, links) with default texts matching how the site works
+- CMS › Legal notice: publisher details (name, status, address, email, phone, publication director), host (Hostinger by default), reorderable sections; SEO title and description
+- Footer: “Legal notice” link next to the copyright, its label editable in Site settings › Footer
+- Sitemap and smoke test include the new page
+
+### Commit
+Step 1.2 - Legal notice page
+
 ## 0.2.0 — 2026-10-17
 
 Image framing in the CMS.
