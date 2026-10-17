@@ -112,6 +112,29 @@ export function Tag({ color = 'pink', selected, small, children }) {
   );
 }
 
+// Image value of the CMS: { src, x, y, zoom } (an older plain address is still accepted)
+export const toImage = (value) => (typeof value === 'string' ? { src: value, x: 50, y: 50, zoom: 1 } : { x: 50, y: 50, zoom: 1, ...value });
+
+// Position and zoom chosen in the CMS: focus point in % (object-position), zoom around that point
+export function framingStyle(value) {
+  const { x, y, zoom } = toImage(value);
+  return {
+    objectPosition: `${x}% ${y}%`,
+    ...(zoom > 1 && { transform: `scale(${zoom})`, transformOrigin: `${x}% ${y}%` }),
+  };
+}
+
+// Picture filling its frame (the frame's size and corners come from the CSS class)
+export function FramedImage({ image, alt, className, ...props }) {
+  const img = toImage(image);
+  if (!img.src) return null;
+  return (
+    <div className={className}>
+      <img src={img.src} alt={alt} style={framingStyle(img)} {...props} />
+    </div>
+  );
+}
+
 // Brand signature: the three accents + "VERTICALS & ALL THE FEELINGS"
 export function Signature({ children }) {
   return (

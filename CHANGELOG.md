@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 — 2026-10-17
+
+Image framing in the CMS.
+
+- Every image field now has a framing tool: the preview takes the shape of the image's slot on the site (ratio and corners of the mock-up), drag the picture to move it, zoom up to 300% with the slider, the mouse wheel or + / −, arrow keys to nudge it, “Center” to reset
+- Images are saved as `{ src, x, y, zoom }` (focus point in % and zoom), validated and clamped by the server; addresses saved by 0.1.0 are still read
+- The site applies the framing with the new `FramedImage` component (homepage portrait, show artwork, host card, About photos)
+
+### Commit
+Step 1.1 - Image framing tool in the CMS
+
 ## 0.1.0 — 2026-10-17
 
 First version of the website and its CMS, based on the “RealReelDrama” Figma mock-up.

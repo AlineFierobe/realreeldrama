@@ -2,7 +2,7 @@ import sparkles from '../assets/icons/sparkles.svg';
 import messagesSquare from '../assets/icons/messages-square.svg';
 import mic from '../assets/icons/mic.svg';
 import { PageContent, useSite } from '../components/PublicLayout.jsx';
-import { Button, Lines, Paragraphs, SectionSignature, SocialIcon, Tag, TextLink } from '../components/ui.jsx';
+import { Button, FramedImage, Lines, Paragraphs, SectionSignature, SocialIcon, Tag, TextLink } from '../components/ui.jsx';
 
 // Homepage (Figma frame "REAL REEL DRAMA · Homepage"): Meet Meagan, Real Reel Unscripted,
 // Reviews & Industry, About, Social medias. Texts: CMS › Homepage.
@@ -25,11 +25,7 @@ function Hero({ hero }) {
         </div>
       </div>
       <figure className="hero__portrait">
-        {hero.image && (
-          <div className="hero__photo">
-            <img src={hero.image} alt={hero.imageAlt} width="500" height="889" fetchpriority="high" />
-          </div>
-        )}
+        <FramedImage className="hero__photo" image={hero.image} alt={hero.imageAlt} width="500" height="889" fetchpriority="high" />
         {hero.caption && (
           <figcaption className="hero__caption">
             <span className="script">{hero.caption}</span>
@@ -48,10 +44,10 @@ function Unscripted({ show }) {
         <SectionSignature label={show.label} note={show.note} />
         <div className="unscripted__body">
           <div className="unscripted__artwork">
-            {show.coverImage && <img className="unscripted__cover" src={show.coverImage} alt={show.coverAlt} width="430" height="430" loading="lazy" />}
-            {show.hostImage && (
+            <FramedImage className="unscripted__cover" image={show.coverImage} alt={show.coverAlt} width="430" height="430" loading="lazy" />
+            {show.hostImage?.src && (
               <div className="unscripted__host">
-                <img src={show.hostImage} alt={show.hostAlt} width="176" height="224" loading="lazy" />
+                <FramedImage className="unscripted__host-photo" image={show.hostImage} alt={show.hostAlt} width="176" height="224" loading="lazy" />
               </div>
             )}
             {show.annotation && <p className="script unscripted__annotation">{show.annotation}</p>}
@@ -110,11 +106,7 @@ function About({ about }) {
         <SectionSignature label={about.label} note={about.note} />
         <div className="about-teaser__body">
           <figure className="about-teaser__figure">
-            {about.image && (
-              <div className="about-teaser__photo">
-                <img src={about.image} alt={about.imageAlt} width="400" height="600" loading="lazy" />
-              </div>
-            )}
+            <FramedImage className="about-teaser__photo" image={about.image} alt={about.imageAlt} width="400" height="600" loading="lazy" />
             {about.caption && <figcaption className="caps caps--light about-teaser__caption">{about.caption}</figcaption>}
           </figure>
           <div className="about-teaser__copy">

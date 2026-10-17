@@ -220,7 +220,6 @@ main {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 47%;
 }
 
 .hero__caption {
@@ -253,9 +252,15 @@ main {
   left: 0;
   width: 430px;
   height: 430px;
+  overflow: hidden;
   border-radius: var(--r-md);
-  object-fit: cover;
   box-shadow: var(--shadow-card);
+}
+
+.unscripted__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* Host card, slightly tilted like a photo pinned on a board */
@@ -272,10 +277,16 @@ main {
   box-shadow: var(--shadow-card);
 }
 
-.unscripted__host img {
+.unscripted__host-photo {
   width: 100%;
   height: 100%;
+  overflow: hidden;
   border-radius: 10px;
+}
+
+.unscripted__host-photo img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -402,7 +413,6 @@ main {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 0;
 }
 
 .about-teaser__caption {

@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { cmsMediaApi, MAX_IMAGE_MB } from '../../lib/api.js';
-import { Loader, Tag } from '../../components/ui.jsx';
+import { framingStyle, Loader, Tag, toImage } from '../../components/ui.jsx';
 
 // CMS fields, built from the definitions of server/src/data/pages.js
 // (text, textarea, url, image, select, list). Lists can contain other lists.
@@ -22,7 +22,9 @@ const MOCKUP_IMAGES = [
 
 // Empty value of a list item (for "Add")
 export function emptyItem(fields) {
-  return Object.fromEntries(fields.map((f) => [f.key, f.type === 'list' ? [] : f.type === 'select' ? f.default ?? f.options[0].value : '']));
+  return Object.fromEntries(
+    fields.map((f) => [f.key, f.type === 'list' ? [] : f.type === 'select' ? (f.default ?? f.options[0].value) : f.type === 'image' ? toImage('') : ''])
+  );
 }
 
 // Text summarizing a collapsed list item: first filled text field
@@ -108,12 +110,141 @@ function ListField({ field, value, onChange, depth }) {
 // Image library, shared by all the image fields of the screen
 let libraryCache = null;
 
+const MAX_ZOOM = 3; // same limit as the server (utils/content.js)
+const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+const round1 = (n) => Math.round(n * 10) / 10;
+
+// Framing tool: the preview has the shape of the image's slot on the site (field.frame).
+// Drag the picture to move it, zoom with the slider or the mouse wheel, arrows and +/- on the keyboard.
+// The result is a focus point in % (x, y) and a zoom, applied on the site by FramedImage.
+function Framing({ field, image, onChange, onDropFile, busy }) {
+  const frameRef = useRef(null);
+  const drag = useRef(null);
+  const [natural, setNatural] = useState(null); // { w, h } of the loaded picture
+  const frame = field.frame ?? { ratio: '4 / 3', radius: '16px' };
+
+  useEffect(() => setNatural(null), [image.src]);
+
+  const update = (patch) => onChange({ ...image, ...patch });
+
+  // Distance (px) the picture can travel in the frame, on each axis, at the current zoom
+  const travel = () => {
+    const box = frameRef.current?.getBoundingClientRect();
+    if (!box || !natural) return { w: 0, h: 0 };
+    const scale = Math.max(box.width / natural.w, box.height / natural.h) * image.zoom;
+    return { w: natural.w * scale - box.width, h: natural.h * scale - box.height };
+  };
+
+  const onPointerDown = (e) => {
+    if (!image.src || e.button !== 0) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { px: e.clientX, py: e.clientY, x: image.x, y: image.y, travel: travel() };
+  };
+
+  const onPointerMove = (e) => {
+    const d = drag.current;
+    if (!d) return;
+    // Moving the picture right shows more of its left side: the focus point goes left
+    const x = d.travel.w > 1 ? clamp(d.x - ((e.clientX - d.px) / d.travel.w) * 100, 0, 100) : d.x;
+    const y = d.travel.h > 1 ? clamp(d.y - ((e.clientY - d.py) / d.travel.h) * 100, 0, 100) : d.y;
+    update({ x: round1(x), y: round1(y) });
+  };
+
+  const endDrag = () => {
+    drag.current = null;
+  };
+
+  const zoomTo = (zoom) => update({ zoom: round1(clamp(zoom, 1, MAX_ZOOM)) });
+
+  const onKeyDown = (e) => {
+    const step = e.shiftKey ? 10 : 2;
+    const moves = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] };
+    if (moves[e.key]) {
+      e.preventDefault();
+      const [dx, dy] = moves[e.key];
+      update({ x: clamp(image.x + dx, 0, 100), y: clamp(image.y + dy, 0, 100) });
+    } else if (e.key === '+' || e.key === '=') {
+      e.preventDefault();
+      zoomTo(image.zoom + 0.1);
+    } else if (e.key === '-') {
+      e.preventDefault();
+      zoomTo(image.zoom - 0.1);
+    }
+  };
+
+  // Mouse wheel zoom (React's onWheel can't prevent the page from scrolling)
+  useEffect(() => {
+    const el = frameRef.current;
+    if (!el || !image.src) return undefined;
+    const onWheel = (e) => {
+      e.preventDefault();
+      onChange({ ...image, zoom: round1(clamp(image.zoom - e.deltaY * 0.002, 1, MAX_ZOOM)) });
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [image, onChange]);
+
+  const moved = image.x !== 50 || image.y !== 50 || image.zoom !== 1;
+
+  return (
+    <div className="cms-framing">
+      <div
+        ref={frameRef}
+        className={`cms-framing__frame${busy ? ' is-busy' : ''}${image.src ? '' : ' is-empty'}`}
+        style={{ aspectRatio: frame.ratio, borderRadius: frame.radius }}
+        tabIndex={image.src ? 0 : -1}
+        role={image.src ? 'application' : undefined}
+        aria-label="Image framing: drag or use the arrow keys to move, + and − to zoom"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onKeyDown={onKeyDown}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          onDropFile(e.dataTransfer.files?.[0]);
+        }}
+      >
+        {image.src ? (
+          <img
+            src={image.src}
+            alt=""
+            draggable="false"
+            style={framingStyle(image)}
+            onLoad={(e) => setNatural({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight })}
+          />
+        ) : (
+          <span className="text-s">No image</span>
+        )}
+        {busy && <Loader label="Uploading…" />}
+      </div>
+      {image.src && (
+        <div className="cms-framing__controls">
+          <label className="cms-framing__zoom">
+            <span className="text-s">Zoom</span>
+            <input type="range" min="1" max={MAX_ZOOM} step="0.05" value={image.zoom} onChange={(e) => zoomTo(Number(e.target.value))} />
+            <span className="text-s cms-framing__value">{Math.round(image.zoom * 100)}%</span>
+          </label>
+          <button type="button" className="btn btn--text btn--small" onClick={() => update({ x: 50, y: 50, zoom: 1 })} disabled={!moved}>
+            <span className="btn__surface">Center</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const sameImage = (a, b) => a.src === b.src && a.x === b.x && a.y === b.y && a.zoom === b.zoom;
+
 function ImageField({ field, value, onChange, id }) {
   const inputRef = useRef(null);
   const [picking, setPicking] = useState(false);
   const [library, setLibrary] = useState(libraryCache);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const image = toImage(value ?? '');
+  const fallback = toImage(field.default ?? '');
 
   useEffect(() => {
     if (!picking || library) return;
@@ -126,6 +257,9 @@ function ImageField({ field, value, onChange, id }) {
       .catch((err) => setError(err.message));
   }, [picking, library]);
 
+  // A new picture starts centered, without zoom
+  const choose = (src) => onChange({ src, x: 50, y: 50, zoom: 1 });
+
   const upload = async (file) => {
     if (!file) return;
     setError('');
@@ -136,7 +270,7 @@ function ImageField({ field, value, onChange, id }) {
       const media = await cmsMediaApi.upload(file);
       libraryCache = [media, ...(libraryCache ?? [])];
       setLibrary(libraryCache);
-      onChange(media.url);
+      choose(media.url);
       setPicking(false);
     } catch (err) {
       setError(err.message);
@@ -154,19 +288,9 @@ function ImageField({ field, value, onChange, id }) {
         {field.label}
       </span>
       <div className="cms-image__row">
-        <div
-          className={`cms-image__preview${busy ? ' is-busy' : ''}`}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            upload(e.dataTransfer.files?.[0]);
-          }}
-        >
-          {value ? <img src={value} alt="" /> : <span className="text-s">No image</span>}
-          {busy && <Loader label="Uploading…" />}
-        </div>
+        <Framing field={field} image={image} onChange={onChange} onDropFile={upload} busy={busy} />
         <div className="cms-image__tools">
-          <p className="text-s">Drop an image on the preview, or:</p>
+          {image.src && <p className="text-s">Drag the picture to move it in its frame, zoom with the slider or the mouse wheel. The frame has the shape of the image on the site.</p>}
           <div className="actions">
             <button type="button" className="btn btn--primary btn--small" onClick={() => inputRef.current?.click()} disabled={busy}>
               <span className="btn__surface">{busy ? 'Uploading…' : 'Upload'}</span>
@@ -174,13 +298,13 @@ function ImageField({ field, value, onChange, id }) {
             <button type="button" className="btn btn--outline btn--small" aria-expanded={picking} onClick={() => setPicking((p) => !p)}>
               <span className="btn__surface">{picking ? 'Close library' : 'Library'}</span>
             </button>
-            {field.default && value !== field.default && (
-              <button type="button" className="btn btn--text btn--small" onClick={() => onChange(field.default)}>
+            {fallback.src && !sameImage(image, fallback) && (
+              <button type="button" className="btn btn--text btn--small" onClick={() => onChange(fallback)}>
                 <span className="btn__surface">Mock-up image</span>
               </button>
             )}
           </div>
-          <p className="field__help">JPEG, PNG, WebP or GIF · {MAX_IMAGE_MB} MB max.</p>
+          <p className="field__help">Drop a file on the frame or upload one: JPEG, PNG, WebP or GIF · {MAX_IMAGE_MB} MB max.</p>
           <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden aria-labelledby={`${id}-label`} onChange={(e) => upload(e.target.files?.[0])} />
         </div>
       </div>
@@ -193,10 +317,10 @@ function ImageField({ field, value, onChange, id }) {
               key={m.url}
               type="button"
               role="option"
-              aria-selected={m.url === value}
-              className={`cms-library__item${m.url === value ? ' is-selected' : ''}`}
+              aria-selected={m.url === image.src}
+              className={`cms-library__item${m.url === image.src ? ' is-selected' : ''}`}
               onClick={() => {
-                onChange(m.url);
+                choose(m.url);
                 setPicking(false);
               }}
               title={m.filename}

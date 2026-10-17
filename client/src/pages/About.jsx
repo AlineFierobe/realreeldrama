@@ -1,6 +1,6 @@
 import sparkles from '../assets/icons/sparkles.svg';
 import { PageContent } from '../components/PublicLayout.jsx';
-import { Button, Lines, Paragraphs, SectionSignature, Tag, TextLink } from '../components/ui.jsx';
+import { Button, FramedImage, Lines, Paragraphs, SectionSignature, Tag, TextLink } from '../components/ui.jsx';
 
 // About page: not drawn in the mock-up, built with the homepage's sections and the UI kit.
 // Texts: CMS › About.
@@ -19,11 +19,7 @@ export default function About() {
               <Paragraphs text={intro.text} className="lead" />
             </div>
             <figure className="about-teaser__figure hero__headshot">
-              {intro.image && (
-                <div className="about-teaser__photo">
-                  <img src={intro.image} alt={intro.imageAlt} width="400" height="600" fetchpriority="high" />
-                </div>
-              )}
+              <FramedImage className="about-teaser__photo" image={intro.image} alt={intro.imageAlt} width="400" height="600" fetchpriority="high" />
               {intro.caption && <figcaption className="caps caps--light about-teaser__caption">{intro.caption}</figcaption>}
             </figure>
           </section>

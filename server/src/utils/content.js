@@ -4,7 +4,9 @@
 //   cleanContent(page, in)  content received from the CMS, reduced to known fields and validated
 // A validation error has status 400: the error handler sends it back as is.
 
-const MAX_LENGTH = { text: 300, url: 500, image: 300, textarea: 6000, select: 100 };
+const MAX_LENGTH = { text: 300, url: 500, textarea: 6000, select: 100 };
+const MAX_SRC_LENGTH = 300;
+export const MAX_ZOOM = 3;
 const MAX_ITEMS = 60;
 
 const badRequest = (message) => Object.assign(new Error(message), { status: 400 });
@@ -22,6 +24,21 @@ export function isAllowedImage(value) {
   return /^\/images\/[\w.-]+\.(jpe?g|png|webp|gif|svg)$/i.test(value) || /^\/api\/media\/[a-f0-9]{24}$/.test(value);
 }
 
+const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+const round1 = (n) => Math.round(n * 10) / 10;
+
+// Image value: { src, x, y, zoom }. An older value saved as a plain address is still accepted.
+export function toImage(value, fallback = {}) {
+  const v = typeof value === 'string' ? { src: value } : value && typeof value === 'object' ? value : {};
+  const num = (n, d) => (Number.isFinite(Number(n)) && n !== '' && n !== null ? Number(n) : d);
+  return {
+    src: typeof v.src === 'string' ? v.src : (fallback.src ?? ''),
+    x: round1(clamp(num(v.x, fallback.x ?? 50), 0, 100)),
+    y: round1(clamp(num(v.y, fallback.y ?? 50), 0, 100)),
+    zoom: round1(clamp(num(v.zoom, 1), 1, MAX_ZOOM)),
+  };
+}
+
 const fieldDefault = (field) => structuredClone(field.default ?? (field.type === 'list' ? [] : ''));
 
 // List item: each field takes the saved value, otherwise an empty value
@@ -30,6 +47,7 @@ function mergeItem(fields, item = {}) {
     fields.map((f) => {
       if (f.type === 'list') return [f.key, Array.isArray(item[f.key]) ? item[f.key].map((i) => mergeItem(f.fields, i)) : []];
       if (f.type === 'select') return [f.key, f.options.some((o) => o.value === item[f.key]) ? item[f.key] : f.default];
+      if (f.type === 'image') return [f.key, toImage(item[f.key])];
       return [f.key, typeof item[f.key] === 'string' ? item[f.key] : ''];
     })
   );
@@ -48,6 +66,7 @@ export function mergeContent(page, stored = {}) {
           const value = stored?.[s.key]?.[f.key];
           if (value === undefined || value === null) return [f.key, fieldDefault(f)];
           if (f.type === 'list') return [f.key, Array.isArray(value) ? value.map((i) => mergeItem(f.fields, i)) : fieldDefault(f)];
+          if (f.type === 'image') return [f.key, toImage(value, f.default)];
           return [f.key, value];
         })
       ),
@@ -65,13 +84,18 @@ function cleanValue(field, value, path) {
       return Object.fromEntries(field.fields.map((f) => [f.key, cleanValue(f, item[f.key], `${path} #${i + 1} › ${f.label}`)]));
     });
   }
+  if (field.type === 'image') {
+    const img = toImage(value ?? '');
+    img.src = img.src.trim();
+    if (img.src.length > MAX_SRC_LENGTH || !isAllowedImage(img.src)) throw badRequest(`${path}: choose an image from the library or upload one.`);
+    return img;
+  }
   if (value === undefined || value === null) value = '';
   if (typeof value !== 'string') throw badRequest(`${path} must be text.`);
   // Consistent line endings; extra spaces removed at the start and end
   const clean = value.replace(/\r\n?/g, '\n').trim();
   if (clean.length > MAX_LENGTH[field.type]) throw badRequest(`${path}: ${MAX_LENGTH[field.type]} characters maximum.`);
   if (field.type === 'url' && !isAllowedUrl(clean)) throw badRequest(`${path}: enter a full link (https://…), an email (mailto:…), a page (/about) or an anchor (#unscripted).`);
-  if (field.type === 'image' && !isAllowedImage(clean)) throw badRequest(`${path}: choose an image from the library or upload one.`);
   if (field.type === 'select' && !field.options.some((o) => o.value === clean)) throw badRequest(`${path}: invalid choice.`);
   return clean;
 }
@@ -104,7 +128,8 @@ export function imagesIn(page, content) {
   const found = [];
   const walk = (fields, value) => {
     for (const f of fields) {
-      if (f.type === 'image' && value?.[f.key]) found.push(value[f.key]);
+      const src = f.type === 'image' && toImage(value?.[f.key]).src;
+      if (src) found.push(src);
       if (f.type === 'list') (value?.[f.key] ?? []).forEach((item) => walk(f.fields, item));
     }
   };

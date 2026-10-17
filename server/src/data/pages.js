@@ -8,14 +8,22 @@
 //   text      one line (headings, labels); a "\n" typed as a line break is kept in multi-line headings
 //   textarea  several lines; an empty line separates two paragraphs
 //   url       link: full address (https://…), mailto:, site path (/about) or anchor (#unscripted)
-//   image     picture: a mock-up photo (/images/…) or an image uploaded in the CMS (/api/media/…)
+//   image     picture { src, x, y, zoom }: a mock-up photo (/images/…) or an image uploaded in the CMS
+//             (/api/media/…), with its framing (focus point in % and zoom) chosen in the CMS.
+//             "frame" describes the slot of the mock-up (ratio, corners) so the CMS preview matches it.
 //   select    one value among "options"
 //   list      list of repeatable items, each with its own fields ("fields")
 
 const text = (key, label, value = '', help) => ({ key, label, type: 'text', default: value, help });
 const area = (key, label, value = '', help) => ({ key, label, type: 'textarea', default: value, help });
 const url = (key, label, value = '', help) => ({ key, label, type: 'url', default: value, help });
-const image = (key, label, value = '', help) => ({ key, label, type: 'image', default: value, help });
+const image = (key, label, src, frame = {}, focus = {}) => ({
+  key,
+  label,
+  type: 'image',
+  default: { src, x: focus.x ?? 50, y: focus.y ?? 50, zoom: 1 },
+  frame: { ratio: '4 / 3', radius: '16px', ...frame },
+});
 const select = (key, label, options, value, help) => ({ key, label, type: 'select', options, default: value ?? options[0].value, help });
 const list = (key, label, itemLabel, fields, value = [], help) => ({ key, label, type: 'list', itemLabel, fields, default: value, help });
 
@@ -112,7 +120,7 @@ export const PAGES = [
           url('primaryUrl', 'Main button link', '/about'),
           text('secondaryLabel', 'Second button label', 'Explore Unscripted'),
           url('secondaryUrl', 'Second button link', '#unscripted'),
-          image('image', 'Portrait', '/images/meagan-hero.jpg'),
+          image('image', 'Portrait', '/images/meagan-hero.jpg', { ratio: '1 / 1', radius: '240px 240px 24px 24px' }, { y: 47 }),
           alt('Meagan Johnson laughing'),
           text('caption', 'Handwritten caption', 'Small screen. Big feelings.'),
         ],
@@ -123,9 +131,9 @@ export const PAGES = [
         fields: [
           sectionLabel('REAL REEL UNSCRIPTED'),
           handNote('Let’s ditch the script.'),
-          image('coverImage', 'Show artwork', '/images/unscripted-cover.jpg'),
+          image('coverImage', 'Show artwork', '/images/unscripted-cover.jpg', { ratio: '1 / 1', radius: '16px' }),
           text('coverAlt', 'Show artwork description', 'Real Reel Unscripted, behind the screen, beyond the chaos, hosted by Meagan Johnson'),
-          image('hostImage', 'Host card picture', '/images/unscripted-host.jpg'),
+          image('hostImage', 'Host card picture', '/images/unscripted-host.jpg', { ratio: '176 / 224', radius: '10px' }),
           text('hostAlt', 'Host card description', 'Meagan Johnson on the Real Reel Unscripted poster'),
           text('annotation', 'Handwritten annotation', 'Behind the vertical screen'),
           area('title', 'Show title', 'REAL REEL\nUNSCRIPTED', lineBreakHelp),
@@ -171,7 +179,7 @@ export const PAGES = [
         fields: [
           sectionLabel('ABOUT'),
           handNote('A face behind the feelings.'),
-          image('image', 'Photo', '/images/meagan-headshot.jpg'),
+          image('image', 'Photo', '/images/meagan-headshot.jpg', { ratio: '400 / 352', radius: '24px' }, { y: 0 }),
           alt('Portrait of Meagan Johnson'),
           text('caption', 'Photo caption', 'MEAGAN JOHNSON / FOUNDER & HOST'),
           area('title', 'Handwritten heading', 'Curiosity, commentary,\nand a whole lot of heart.', lineBreakHelp),
@@ -215,7 +223,7 @@ export const PAGES = [
             'Introduction',
             'Meagan Johnson, founder of RealReelDrama, is a leading voice in the vertical drama space—blending cultural insight, sharp commentary, and industry curiosity.'
           ),
-          image('image', 'Photo', '/images/meagan-headshot.jpg'),
+          image('image', 'Photo', '/images/meagan-headshot.jpg', { ratio: '440 / 480', radius: '24px' }, { y: 0 }),
           alt('Portrait of Meagan Johnson'),
           text('caption', 'Photo caption', 'MEAGAN JOHNSON / FOUNDER & HOST'),
         ],
